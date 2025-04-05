@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,6 +59,7 @@ export const TitleSelect = ({
 }: TitleSelectProps) => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [selectedId, setSelectedId] = useState<string>('')
   const titleInputId = 'project-title-input'
   const { error } = useFormField()
 
@@ -66,12 +67,14 @@ export const TitleSelect = ({
    * 프로젝트 선택 핸들러
    */
   const handleSelect = (currentValue: string) => {
-    // value에서 저장소 이름만 추출하여 필드에 설정
+    // value는 문자열로 된 ID이므로 해당 ID로 저장소 찾기
     const selectedRepo = repositories.find(
       (repo) => repo.value === currentValue,
     )
     if (selectedRepo) {
+      // 레이블(저장소 이름)을 필드에 설정
       field.onChange(selectedRepo.label)
+      setSelectedId(selectedRepo.value)
     }
     setOpen(false)
   }
@@ -84,6 +87,16 @@ export const TitleSelect = ({
     e.stopPropagation()
     handleSelect(value)
   }
+
+  // 컴포넌트 초기 마운트 시 field.value에 해당하는 저장소 ID 설정
+  useEffect(() => {
+    if (field.value && repositories.length > 0) {
+      const repo = repositories.find((repo) => repo.label === field.value)
+      if (repo) {
+        setSelectedId(repo.value)
+      }
+    }
+  }, [field.value, repositories])
 
   /**
    * 선택된 프로젝트 라벨 찾기
@@ -135,6 +148,7 @@ export const TitleSelect = ({
           >
             <CommandInput
               placeholder="프로젝트 검색..."
+              value={search}
               onValueChange={setSearch}
             />
             <CommandList>
@@ -143,12 +157,13 @@ export const TitleSelect = ({
               </CommandEmpty>
               <CommandGroup>
                 {repositories
-                  .filter(
-                    (repo) =>
-                      search === '' ||
+                  .filter((repo) => {
+                    if (!search) return true
+                    return (
                       repo.label.toLowerCase().includes(search.toLowerCase()) ||
-                      repo.value.toLowerCase().includes(search.toLowerCase()),
-                  )
+                      repo.value.toLowerCase().includes(search.toLowerCase())
+                    )
+                  })
                   .map((repository) => (
                     <div
                       key={repository.value}
@@ -160,15 +175,15 @@ export const TitleSelect = ({
                         onSelect={() => handleSelect(repository.value)}
                         className={cn(
                           'w-full !bg-white px-3 py-2 text-left text-sm',
-                          field.value === repository.value &&
+                          selectedId === repository.value &&
                             '!bg-slate-100 font-medium',
                         )}
-                        data-selected={field.value === repository.value}
+                        data-selected={selectedId === repository.value}
                       >
                         <Check
                           className={cn(
                             'mr-2 h-4 w-4',
-                            field.value === repository.value
+                            selectedId === repository.value
                               ? 'opacity-100'
                               : 'opacity-0',
                           )}

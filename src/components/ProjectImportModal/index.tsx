@@ -25,6 +25,11 @@ interface ProjectImportModalProps {
   onSubmit: (data?: ProjectFormValues, success?: boolean) => void
 }
 
+// 내부에서만 사용할 확장된 저장소 인터페이스
+interface EnhancedRepository extends Repository {
+  repoId: number // 실제 GitHub 저장소 ID
+}
+
 /**
  * 프로젝트 정보 입력을 위한 모달 컴포넌트
  */
@@ -32,7 +37,7 @@ export const ProjectImportModal = ({
   onClose,
   onSubmit,
 }: ProjectImportModalProps) => {
-  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [repositories, setRepositories] = useState<EnhancedRepository[]>([])
   const [submitStatus, setSubmitStatus] = useState<
     'idle' | 'loading' | 'error'
   >('idle')
@@ -68,8 +73,9 @@ export const ProjectImportModal = ({
   useEffect(() => {
     if (reposData?.result) {
       const mappedRepos = reposData.result.map((repo: GithubRepo) => ({
-        value: `${repo.id}-${repo.name}`,
+        value: `${repo.id}`, // ID를 명시적으로 문자열로 변환
         label: repo.name,
+        repoId: repo.id,
       }))
       setRepositories(mappedRepos)
     }
@@ -90,24 +96,13 @@ export const ProjectImportModal = ({
     setSubmitStatus('loading')
     setErrorMessage('')
 
-    // 선택된 레포지토리의 ID 추출
+    // 선택된 레포지토리 찾기 (이름으로 매칭)
     const selectedRepo = repositories.find((repo) => repo.label === data.title)
 
     // 레포지토리가 선택되지 않았다면 오류 상태 설정 후 함수 종료
-    if (!selectedRepo || !selectedRepo.value) {
+    if (!selectedRepo) {
       setSubmitStatus('error')
       setErrorMessage('유효한 GitHub 레포지토리를 선택해주세요.')
-      return
-    }
-
-    // value 형식이 'id-name'이므로 ID 부분만 추출
-    const idStr = selectedRepo.value.split('-')[0]
-    const repoId = parseInt(idStr)
-
-    // ID 파싱에 실패했다면 오류 상태 설정 후 함수 종료
-    if (isNaN(repoId)) {
-      setSubmitStatus('error')
-      setErrorMessage('유효한 GitHub 레포지토리 ID를 확인할 수 없습니다.')
       return
     }
 
@@ -119,7 +114,7 @@ export const ProjectImportModal = ({
 
     // 서버에 전송할 데이터 구조로 변환
     const serverData: ProjectCreateRequest = {
-      id: repoId,
+      id: selectedRepo.repoId, // 저장된 실제 레포지토리 ID 사용
       description: data.description,
       role: data.role,
       status: statusMap[data.status as keyof typeof statusMap] as
