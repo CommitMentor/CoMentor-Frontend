@@ -1,5 +1,8 @@
+'use client'
+
 import { Pen, Trash2, Loader2 } from 'lucide-react'
 import { CardType } from './DashboardCard'
+import { useRouter } from 'next/navigation'
 
 interface CardContentProps {
   card: CardType
@@ -21,6 +24,8 @@ export const CardContent = ({
   onDeleteClick,
   onCloseError,
 }: CardContentProps) => {
+  const router = useRouter()
+
   // 날짜에서 시간을 제외하고 YYYY. MM. DD 형식으로 변환
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -32,9 +37,20 @@ export const CardContent = ({
     return status === 'PROGRESS' ? 'Progress' : 'Done'
   }
 
+  // 프로젝트 상세 페이지로 이동하는 핸들러
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 편집/삭제 버튼 클릭 시 이벤트 전파 방지
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+
+    router.push(`/project/${card.id}`)
+  }
+
   return (
     <article
-      className={`flex h-52 w-[306px] rounded-[8px] border ${deleteStatus === 'error' ? 'border-red-400 bg-red-50' : 'border-slate-400 bg-white'} p-[21px] shadow-md transition-all`}
+      className={`flex h-52 w-[306px] rounded-[8px] border ${deleteStatus === 'error' ? 'border-red-400 bg-red-50' : 'border-slate-400 bg-white'} cursor-pointer p-[21px] shadow-md transition-all hover:shadow-lg`}
+      onClick={handleCardClick}
     >
       <div className="flex w-full flex-col gap-[22px]">
         {/* 오류 메시지 표시 */}

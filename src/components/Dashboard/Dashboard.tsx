@@ -2,7 +2,7 @@ import { PlusCircle, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { DashboardCard } from '../DashboardCard/DashboardCard'
 import { ProjectImportModal } from '../ProjectImportModal'
-import { useProjectList } from '@/api/services/project'
+import { useProjectList } from '@/api/services/project/index'
 import { ProjectFormValues } from '../ProjectImportModal/TitleSelect'
 import type { CardType } from '../DashboardCard/DashboardCard'
 

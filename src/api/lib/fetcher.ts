@@ -14,15 +14,20 @@ const fetcher = async <T>(
   const { accessToken, refreshToken, setAccessToken, clearAuth } =
     useAuthStore.getState()
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
+
   const fetchRequest = async (token: string | null): Promise<T> => {
-    const response = await fetch(`/api/${url}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        ...options.headers,
+    const response = await fetch(
+      `${apiUrl.replace(/\/$/, '')}/${url.replace(/^\//, '')}`,
+      {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+          ...options.headers,
+        },
       },
-    })
+    )
 
     // 🔹 401 또는 403 에러가 발생하면 토큰 갱신을 시도
     if ((response.status === 403 || response.status === 401) && retry) {

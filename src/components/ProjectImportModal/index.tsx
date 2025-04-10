@@ -10,7 +10,10 @@ import { Form, FormField } from '@/components/ui/form'
 import { ProjectSchema } from '@/hooks'
 import { useGithubRepos, GithubRepo } from '@/api/services/github'
 import { useEffect, useState, useMemo } from 'react'
-import { useProjectCreate, ProjectCreateRequest } from '@/api/services/project'
+import {
+  useProjectCreate,
+  ProjectCreateRequest,
+} from '@/api/services/project/index'
 
 /**
  * 진행 상태 옵션 정의

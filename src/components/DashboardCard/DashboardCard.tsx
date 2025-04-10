@@ -1,7 +1,7 @@
 import { Pen, Trash2, Loader2, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ProjectEditModal } from '../ProjectEditModal'
-import { useProjectDelete } from '@/api/services/project'
+import { useProjectDelete } from '@/api/services/project/index'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ProjectSuccessMessage } from './ProjectSuccessMessage'
 import { CardContent } from './CardContent'
