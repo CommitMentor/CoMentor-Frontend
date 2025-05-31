@@ -6,7 +6,12 @@
 // =============== 사용자 (User) ===============
 // 타입
 export type { User, UserResponse } from '@/api/services/user/model'
-export { useUserJoin, useUserEdit } from '@/api/services/user/queries'
+export {
+  useUserJoin,
+  useUserEdit,
+  useUserActivity,
+  useRefreshAccessToken,
+} from '@/api/services/user/queries'
 
 // =============== 프로젝트 (Project) ===============
 

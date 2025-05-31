@@ -5,7 +5,11 @@ import { MSWComponent } from '@/api/MSWComponent'
 import ReactQueryProvider from '@/providers/ReactQueryClient'
 
 import GlobalModal from '@/components/Modal/GlobalModal'
-import { AutoRefreshToken, FCMInitializer } from '@/components/Setting'
+import {
+  AutoRefreshToken,
+  FCMInitializer,
+  UserActivityTracker,
+} from '@/components/Setting'
 
 export const metadata: Metadata = {
   title: 'CoMentor',
@@ -25,6 +29,7 @@ const RootLayout = ({
             <ReactQueryProvider>
               <AutoRefreshToken />
               <FCMInitializer />
+              <UserActivityTracker />
 
               <GlobalModal />
               <header className="mx-[60px]">
@@ -38,6 +43,7 @@ const RootLayout = ({
           <ReactQueryProvider>
             <AutoRefreshToken />
             <FCMInitializer />
+            <UserActivityTracker />
 
             <GlobalModal />
             <header className="mx-[60px]">

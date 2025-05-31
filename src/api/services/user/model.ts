@@ -11,3 +11,15 @@ export interface UserResponse {
   message: string
   result: User
 }
+
+export interface DefaultResponse {
+  code: number
+  message: string
+  result: null
+}
+
+export interface RefreshTokenResponse {
+  code: number
+  message: string
+  result: string
+}

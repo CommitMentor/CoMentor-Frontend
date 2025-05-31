@@ -3,52 +3,54 @@
 import { useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
+import { useRefreshAccessToken } from '@/api'
 
 const AutoRefreshToken = () => {
-  const { accessToken, refreshToken, setAccessToken, clearAuth } =
-    useAuthStore()
+  const {
+    accessToken,
+    refreshToken,
+    role,
+    setAccessToken,
+    clearAuth,
+    hydrate,
+  } = useAuthStore()
   const router = useRouter()
 
+  const { mutate: refreshTokenMutate } = useRefreshAccessToken()
+
   useEffect(() => {
-    const refreshAccessToken = async () => {
-      const isDev = process.env.NEXT_PUBLIC_ENV === 'dev'
+    hydrate()
 
-      const shouldTryRefresh =
-        (isDev && !accessToken && refreshToken) || // ✅ dev: Zustand 기준
-        (!isDev && !accessToken) // ✅ prod: accessToken만 없으면 시도
+    const shouldTryRefresh = !accessToken && !!refreshToken && role !== 'GUEST'
 
-      if (shouldTryRefresh) {
-        try {
-          const response = await fetch('/api/user/refresh', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(isDev && refreshToken
-                ? { Authorization: `Bearer ${refreshToken}` }
-                : {}), // prod에서는 서버가 쿠키에서 읽게 함
-            },
-            credentials: 'include',
-          })
+    if (!shouldTryRefresh) return
 
-          if (response.ok) {
-            const data = await response.json()
-            setAccessToken(data.result)
-          } else {
-            clearAuth()
-            router.replace('/')
-          }
-        } catch (error) {
-          console.error('토큰 갱신 실패:', error)
+    refreshTokenMutate(undefined, {
+      onSuccess: (data) => {
+        if (data.result) {
+          setAccessToken(data.result)
+        } else {
           clearAuth()
           router.replace('/')
         }
-      }
-    }
+      },
+      onError: () => {
+        clearAuth()
+        router.replace('/')
+      },
+    })
+  }, [
+    accessToken,
+    refreshToken,
+    role,
+    refreshTokenMutate,
+    setAccessToken,
+    clearAuth,
+    router,
+    hydrate,
+  ])
 
-    refreshAccessToken()
-  }, [accessToken, refreshToken, setAccessToken, clearAuth, router])
-
-  return null // ✅ UI가 필요 없는 컴포넌트
+  return null
 }
 
 export default AutoRefreshToken

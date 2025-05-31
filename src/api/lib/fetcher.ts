@@ -11,7 +11,7 @@ export const fetcher = async <T>(
   options: RequestInit = {},
   retry = true,
 ): Promise<T> => {
-  const { accessToken, refreshToken, setAccessToken, clearAuth } =
+  const { accessToken, refreshToken, role, setAccessToken, clearAuth } =
     useAuthStore.getState()
 
   const fetchRequest = async (token: string | null): Promise<T> => {
@@ -24,21 +24,24 @@ export const fetcher = async <T>(
       },
     })
 
-    // 🔹 인증 실패 시 토큰 재발급 시도
+    // 🔁 accessToken이 만료되었거나 유효하지 않은 경우
     if (response.status === 401 || response.status === 403) {
       if (!retry) {
-        // 이미 재시도 한 번 했는데도 실패했다면, 로그인 해제
         clearAuth()
         throw new Error('인증이 만료되었습니다. 다시 로그인해 주세요.')
       }
 
-      // refreshToken 없으면 그냥 종료
+      // ✅ GUEST 유저는 재발급 시도 금지
+      if (role === 'GUEST') {
+        throw new Error('GUEST 유저는 토큰 재발급 대상이 아닙니다.')
+      }
+
+      // refreshToken 없으면 그냥 로그아웃
       if (!refreshToken) {
         clearAuth()
         throw new Error('토큰이 만료되었습니다. 다시 로그인해 주세요.')
       }
 
-      // 🔁 accessToken 재발급 시도
       const refreshResponse = await fetch('/api/user/refresh', {
         method: 'POST',
         headers: {
@@ -59,10 +62,10 @@ export const fetcher = async <T>(
         throw new Error('토큰 재발급 실패. 다시 로그인해 주세요.')
       }
 
-      // 🆕 새 accessToken 저장
+      // 🔄 새 accessToken 저장
       setAccessToken(data.result)
 
-      // ✅ 한 번만 재시도
+      // ✅ 단 한 번만 재시도
       return await fetcher<T>(url, options, false)
     }
 
@@ -89,24 +92,31 @@ export const useGetQuery = <T>(
   })
 }
 
-export const usePostMutation = <T, V>(
+export const usePostMutation = <T, V = void>(
   url: string,
   options?: UseMutationOptions<T, Error, V>,
 ) => {
   return useMutation<T, Error, V>({
     mutationFn: (data: V) =>
-      fetcher<T>(url, { method: 'POST', body: JSON.stringify(data) }),
+      fetcher<T>(url, {
+        method: 'POST',
+        ...(data !== undefined && { body: JSON.stringify(data) }),
+      }),
     ...options,
   })
 }
 
-export const usePutMutation = <T, V>(
+export const usePutMutation = <T, V = void>(
   url: string,
   options?: UseMutationOptions<T, Error, V>,
 ) => {
   return useMutation<T, Error, V>({
     mutationFn: (data: V) =>
-      fetcher<T>(url, { method: 'PUT', body: JSON.stringify(data) }),
+      fetcher<T>(url, {
+        method: 'PUT',
+        ...(data !== undefined &&
+          data !== null && { body: JSON.stringify(data) }),
+      }),
     ...options,
   })
 }
