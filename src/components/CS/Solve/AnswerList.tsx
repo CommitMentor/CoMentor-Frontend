@@ -7,7 +7,7 @@ interface AnswerListProps {
   answers: CSAnswer[]
 }
 
-export const AnswerList = ({ answers }: AnswerListProps) => {
+const AnswerList = ({ answers }: AnswerListProps) => {
   if (!answers.length) {
     return <p className="text-slate-500">아직 제출된 답변이 없습니다.</p>
   }
@@ -22,3 +22,5 @@ export const AnswerList = ({ answers }: AnswerListProps) => {
     </div>
   )
 }
+
+export default AnswerList

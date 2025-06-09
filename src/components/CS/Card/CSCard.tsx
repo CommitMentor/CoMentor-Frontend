@@ -1,9 +1,12 @@
+'use client'
+
 import { Bookmark } from 'lucide-react'
 import { Button } from '../../ui/button'
 import { useRouter } from 'next/navigation'
 import { CSQuestionList } from '@/api'
 import { mapCS } from '@/lib/mapEnum'
 import { useBookmarkHandler } from '@/hooks/useBookmarkHandler'
+import { useState } from 'react'
 
 interface CSCardProps {
   csQuestion: CSQuestionList
@@ -12,10 +15,22 @@ interface CSCardProps {
 export const CSCard = ({ csQuestion }: CSCardProps) => {
   const router = useRouter()
   const { handleBookmarkClick } = useBookmarkHandler()
-  const isBookmarked = !!csQuestion.fileName
+
+  // ✅ SSR 데이터 기반 초기 상태 설정
+  const [isBookmarked, setIsBookmarked] = useState(!!csQuestion.fileName)
 
   const handleClick = () => {
     router.push(`/cs/solve/${csQuestion.csQuestionId}`)
+  }
+
+  const toggleBookmark = async () => {
+    await handleBookmarkClick({
+      csQuestionId: csQuestion.csQuestionId,
+      isBookmarked,
+      fileName: csQuestion.fileName,
+      refetchKeys: [['CS Dashboard', '0']],
+    })
+    setIsBookmarked((prev) => !prev) // ✅ 로컬 상태 업데이트로 즉시 반영
   }
 
   return (
@@ -24,14 +39,7 @@ export const CSCard = ({ csQuestion }: CSCardProps) => {
         <div className="flex justify-between">
           <p className="text-[18px] font-semibold">{csQuestion.stack}</p>
           <button
-            onClick={() =>
-              handleBookmarkClick({
-                csQuestionId: csQuestion.csQuestionId,
-                isBookmarked,
-                fileName: csQuestion.fileName,
-                refetchKeys: [['CS Dashboard', '0']],
-              })
-            }
+            onClick={toggleBookmark}
             aria-label={isBookmarked ? '북마크 제거' : '북마크 추가'}
             aria-pressed={isBookmarked}
             className="cursor-pointer p-1"
@@ -40,14 +48,14 @@ export const CSCard = ({ csQuestion }: CSCardProps) => {
               size={20}
               className={`${
                 isBookmarked
-                  ? 'fill-yellow-500 text-yellow-500 hover:fill-yellow-400 hover:text-yellow-400 hover:transition-colors'
+                  ? 'fill-yellow-500 text-yellow-500 transition-colors hover:fill-yellow-400 hover:text-yellow-400'
                   : 'text-yellow-400'
               }`}
             />
           </button>
         </div>
         <div className="flex flex-col gap-4">
-          <p className="line-clamp-1 pr-5 text-[18px] font-medium">
+          <p className="truncate pr-5 text-[1rem] font-medium">
             {csQuestion.question}
           </p>
           <div className="flex justify-between">

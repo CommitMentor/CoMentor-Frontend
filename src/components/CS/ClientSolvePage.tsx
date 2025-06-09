@@ -12,12 +12,9 @@ interface ClientSolvePageProps {
 
 export const ClientSolvePage = ({ question }: ClientSolvePageProps) => {
   const { handleBookmarkClick } = useBookmarkHandler()
-  const { data: fetchedData, refetch } = useGetCSQuestionDetail(
-    question.csQuestionId,
-  )
+  const { refetch } = useGetCSQuestionDetail(question.csQuestionId)
 
   const isBookmarked = !!question.fileName
-  const mergedQuestion = fetchedData?.result ?? question
 
   return (
     <main className="flex flex-col items-center justify-center gap-5 px-40 py-5">
@@ -48,7 +45,7 @@ export const ClientSolvePage = ({ question }: ClientSolvePageProps) => {
         </Button>
       </div>
 
-      <CSSolve question={mergedQuestion} refetch={refetch} />
+      <CSSolve question={question} refetch={refetch} />
     </main>
   )
 }

@@ -11,7 +11,7 @@ interface FeedbackListProps {
   feedbacks: CSAnswer[]
 }
 
-export const FeedbackList = ({ feedbacks }: FeedbackListProps) => {
+const FeedbackList = ({ feedbacks }: FeedbackListProps) => {
   if (!feedbacks.length) {
     return <p className="text-slate-500">📝 답변을 하고 피드백을 받아보세요.</p>
   }
@@ -70,3 +70,5 @@ export const FeedbackList = ({ feedbacks }: FeedbackListProps) => {
     </div>
   )
 }
+
+export default FeedbackList

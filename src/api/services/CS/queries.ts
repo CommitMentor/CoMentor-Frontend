@@ -23,6 +23,9 @@ export const useGetCSQuestionDetail = (csQuestionId: number) => {
   return useGetQuery<CSQuestionDetailResponse>(
     ['cs-question', csQuestionId.toString()],
     `/question?csQuestionId=${csQuestionId}`,
+    {
+      enabled: false,
+    },
   )
 }
 

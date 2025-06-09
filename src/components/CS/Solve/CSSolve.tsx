@@ -7,9 +7,12 @@ import { ContentCard } from './ContentCard'
 import { CSQuestionDetail, useCSFeedback, useCSRetryFeedback } from '@/api'
 import { useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import { AnswerList } from './AnswerList'
-import { FeedbackList } from './FeedbackList'
 import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
+const AnswerList = dynamic(() => import('./AnswerList'), { ssr: false })
+const FeedbackList = dynamic(() => import('./FeedbackList'), { ssr: false })
+
 
 interface CSSolveProps {
   question: CSQuestionDetail

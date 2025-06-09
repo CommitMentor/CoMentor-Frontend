@@ -78,6 +78,8 @@ export const EditForm = ({ user }: EditFormProps) => {
             width={60}
             height={60}
             className="rounded-full border border-slate-100"
+            priority
+            sizes="60px"
           />
           <div className="flex flex-1 flex-col">
             <p className="flex items-center gap-2">
