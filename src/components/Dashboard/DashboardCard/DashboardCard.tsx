@@ -92,7 +92,7 @@ export const DashboardCard = ({ card, onRefresh }: DashboardCardProps) => {
           onRefresh() // 대시보드 갱신
         }, 1000)
       },
-      onError: (error) => {
+      onError: (error: any) => {
         setDeleteStatus('error')
         setErrorMessage(
           error.message || '프로젝트 삭제 중 오류가 발생했습니다.',
