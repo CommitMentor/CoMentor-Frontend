@@ -4,7 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ContentCard } from './ContentCard'
-import { CSQuestionDetail, useCSFeedback, useCSRetryFeedback } from '@/api'
+import {
+  CSQuestionDetail,
+  useCSDontknowFeedback,
+  useCSFeedback,
+  useCSRetryFeedback,
+} from '@/api'
 import { useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { AnswerList } from './AnswerList'
@@ -28,6 +33,8 @@ export const CSSolve = ({ question, refetch }: CSSolveProps) => {
 
   const { mutate: submitFeedback, isPending: isSubmitting } = useCSFeedback()
   const { mutate: retryFeedback, isPending: isRetrying } = useCSRetryFeedback()
+  const { mutate: dontknowFeedback, isPending: isSendingDontknow } =
+    useCSDontknowFeedback(question.csQuestionId)
 
   const handleSubmit = () => {
     const payload = {
@@ -53,6 +60,23 @@ export const CSSolve = ({ question, refetch }: CSSolveProps) => {
     } else {
       submitFeedback(payload, { onSuccess })
     }
+  }
+
+  const handleDontKnow = () => {
+    const payload = {
+      csQuestionId: question.csQuestionId,
+    }
+
+    const onSuccess = async () => {
+      await refetch()
+      setTab('solution')
+      // scroll to feedback
+      setTimeout(() => {
+        feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
+    }
+
+    dontknowFeedback(payload, { onSuccess })
   }
 
   const userAnswers = question.answers.filter((a) => a.author === 'USER')
@@ -92,7 +116,18 @@ export const CSSolve = ({ question, refetch }: CSSolveProps) => {
             />
           </ContentCard>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button
+              className="flex w-24 items-center justify-center gap-1"
+              disabled={question.questionStatus == 'DONE'}
+              onClick={handleDontKnow}
+            >
+              {isSendingDontknow && (
+                <Loader2 className="animate-spin text-slate-500" size={16} />
+              )}
+              {isSendingDontknow ? '제출 중...' : '모르겠어요'}
+            </Button>
+
             <Button
               className="flex w-24 items-center justify-center gap-1"
               disabled={

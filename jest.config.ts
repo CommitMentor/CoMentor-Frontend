@@ -10,10 +10,9 @@ const config: Config = {
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   transformIgnorePatterns: [
-    '/node_modules/',
+    'node_modules/(?!react-markdown|remark-.*|rehype-.*|unified|bail|trough|vfile|unist-util-visit|micromark.*)',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
-  // 절대 경로 사용시
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
