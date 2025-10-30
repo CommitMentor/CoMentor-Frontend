@@ -23,6 +23,7 @@ import {
   useProjectDelete,
 } from '@/api'
 import { ProjectEditModal } from '../Modal/ProjectEditModal'
+import { useBookmarkHandler } from '@/hooks/useBookmarkHandler'
 
 export const DetailProject = () => {
   const { projectId } = useParams<{ projectId: string }>()
@@ -45,6 +46,7 @@ export const DetailProject = () => {
   const [activeCSQuestionIds, setActiveCSQuestionIds] = useState<number[]>([])
 
   const { mutateAsync: deleteProject } = useProjectDelete(Number(projectId))
+  const { handleBookmarkClick } = useBookmarkHandler()
 
   // 프로젝트 데이터 로드
   useEffect(() => {
@@ -97,14 +99,26 @@ export const DetailProject = () => {
     [],
   )
 
-  const handleSaveQuestion = useCallback(async (questionId: number) => {
-    try {
-      return await saveCSQuestion(questionId)
-    } catch (error) {
-      console.error('질문 저장 중 오류 발생:', error)
-      return false
-    }
-  }, [])
+  const handleSaveQuestion = useCallback(
+    async (questionId: number) => {
+      try {
+        const success = await new Promise<boolean>((resolve) => {
+          handleBookmarkClick({
+            questionId,
+            isBookmarked: false,
+            onLocalToggle: (newState) => {
+              if (newState) resolve(true)
+            },
+          })
+        })
+        return success
+      } catch (error) {
+        console.error('질문 북마크 저장 중 오류 발생:', error)
+        return false
+      }
+    },
+    [handleBookmarkClick],
+  )
 
   const handleBookmarkQuestion = useCallback(async (questionId: number) => {
     try {
