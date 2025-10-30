@@ -119,7 +119,7 @@ export const CSSolve = ({ question, refetch }: CSSolveProps) => {
           <div className="flex justify-end gap-2">
             <Button
               className="flex w-24 items-center justify-center gap-1"
-              disabled={question.questionStatus == 'DONE'}
+              disabled={question.questionStatus === 'DONE'}
               onClick={handleDontKnow}
             >
               {isSendingDontknow && (

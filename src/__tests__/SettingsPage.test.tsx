@@ -56,7 +56,6 @@ describe('SettingsPage', () => {
       isError: false,
     })
     const { container } = render(<SettingsPage />)
-    // SettingsView shows a Loader2 SVG when loading; assert an svg is rendered
     expect(container.querySelector('svg')).toBeInTheDocument()
   })
 
