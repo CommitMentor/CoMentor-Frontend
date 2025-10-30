@@ -24,8 +24,8 @@ export const fetcher = async <T>(
       },
     })
 
-    // 🔁 accessToken이 만료되었거나 유효하지 않은 경우
-    if (response.status === 401 || response.status === 403) {
+    // 401: 인증 만료(토큰 재발급 시도)
+    if (response.status === 401) {
       if (!retry) {
         clearAuth()
         throw new Error('인증이 만료되었습니다. 다시 로그인해 주세요.')
@@ -67,6 +67,11 @@ export const fetcher = async <T>(
 
       // ✅ 단 한 번만 재시도
       return await fetcher<T>(url, options, false)
+    }
+
+    // 403: 권한 없음 (토큰 만료와는 다른 상태)
+    if (response.status === 403) {
+      throw new Error('권한이 없습니다.')
     }
 
     if (!response.ok) {

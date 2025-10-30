@@ -53,6 +53,10 @@ export interface CSFeedback {
   csQuestionId: number
 }
 
+export interface CSDontknowFeedback {
+  csQuestionId: number
+}
+
 export interface CSFeedbackResponse {
   code: number
   message: string
