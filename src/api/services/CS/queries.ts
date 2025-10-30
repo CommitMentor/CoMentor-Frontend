@@ -1,5 +1,6 @@
 import { fetcher, useGetQuery, usePostMutation } from '@/api/lib/fetcher'
 import {
+  CSDontknowFeedback,
   CSFeedback,
   CSFeedbackResponse,
   CSQuestionDetailResponse,
@@ -55,4 +56,10 @@ export const useCSFeedback = () => {
 
 export const useCSRetryFeedback = () => {
   return usePostMutation<CSFeedbackResponse, CSFeedback>('/feedback/CS/retry')
+}
+
+export const useCSDontknowFeedback = (csQuestionId: number) => {
+  return usePostMutation<CSFeedbackResponse, CSDontknowFeedback>(
+    `/feedback/CS/commentary?csQuestionId=${csQuestionId}`,
+  )
 }

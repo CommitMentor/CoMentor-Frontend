@@ -4,7 +4,10 @@ import SettingsView from './components/SettingView'
 
 function Loading() {
   return (
-    <div className="flex h-screen w-full items-center justify-center">
+    <div
+      className="flex h-screen w-full items-center justify-center"
+      data-testid="loading" 
+    >
       <Loader2 size={32} className="animate-spin text-slate-500" />
     </div>
   )
