@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useCallback } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
 import { ProjectData } from './types'
@@ -27,6 +27,7 @@ import { ProjectEditModal } from '../Modal/ProjectEditModal'
 export const DetailProject = () => {
   const { projectId } = useParams<{ projectId: string }>()
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const tabFromURL = searchParams.get('tab') || null
 
@@ -143,7 +144,7 @@ export const DetailProject = () => {
 
     try {
       await deleteProject()
-      window.location.href = `/dashboard?refresh=${new Date().getTime()}`
+      router.push(`/dashboard?refresh=${new Date().getTime()}`)
     } catch (error) {
       setDeleteError(
         error instanceof Error
@@ -153,7 +154,7 @@ export const DetailProject = () => {
     } finally {
       setDeleteLoading(false)
     }
-  }, [deleteProject])
+  }, [deleteProject, router])
 
   const handleCSQuestionsLoaded = useCallback((questions: any[]) => {
     if (questions && questions.length > 0) {
