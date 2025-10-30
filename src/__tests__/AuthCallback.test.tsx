@@ -49,7 +49,9 @@ describe('AuthCallback page', () => {
       role: 'USER',
     }
 
-    const { handleAuthCallback } = require('@/app/(before)/token/page')
+    const {
+      handleAuthCallback,
+    } = require('@/app/(before)/token/handleAuthCallback')
 
     handleAuthCallback({
       searchParams: { get: (k: string) => searchParamsMap[k] ?? null },
@@ -73,7 +75,9 @@ describe('AuthCallback page', () => {
 
     searchParamsMap = {}
 
-    const { handleAuthCallback } = require('@/app/(before)/token/page')
+    const {
+      handleAuthCallback,
+    } = require('@/app/(before)/token/handleAuthCallback')
 
     handleAuthCallback({
       searchParams: { get: (k: string) => searchParamsMap[k] ?? null },
@@ -96,7 +100,9 @@ describe('AuthCallback page', () => {
 
     searchParamsMap = { role: 'USER' }
 
-    const { handleAuthCallback } = require('@/app/(before)/token/page')
+    const {
+      handleAuthCallback,
+    } = require('@/app/(before)/token/handleAuthCallback')
 
     handleAuthCallback({
       searchParams: { get: (k: string) => searchParamsMap[k] ?? null },
