@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import QuestionHistoryTab from '../index'
-import { HistoryByDate, UIQuestionHistoryItem } from '../../types'
+import { HistoryByDate } from '../../types'
 
 // 하위 컴포넌트 모킹
 jest.mock('../HistoryList', () => ({
@@ -83,8 +83,6 @@ describe('QuestionHistoryTab', () => {
   }
 
   const onBookmarkQuestionMock = jest.fn()
-  const onAnswerSubmitMock = jest.fn()
-  const onTabChangeMock = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -138,8 +136,6 @@ describe('QuestionHistoryTab', () => {
   })
 
   test('질문 목록이 비어있으면 빈 상태 메시지를 표시한다', () => {
-    const useQuestionHistoryModule = require('../useQuestionHistory')
-
     const MockedUseQuestionHistory = jest.fn(() => ({
       history: {},
       loading: false,

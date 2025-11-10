@@ -102,14 +102,27 @@ export const DetailProject = () => {
   const handleSaveQuestion = useCallback(
     async (questionId: number) => {
       try {
-        const success = await new Promise<boolean>((resolve) => {
-          handleBookmarkClick({
-            questionId,
-            isBookmarked: false,
-            onLocalToggle: (newState) => {
-              if (newState) resolve(true)
-            },
-          })
+        const success = await new Promise<boolean>((resolve, reject) => {
+          let settled = false
+
+          const finalize = (value: boolean) => {
+            if (settled) return
+            settled = true
+            resolve(value)
+          }
+
+          try {
+            handleBookmarkClick({
+              questionId,
+              isBookmarked: false,
+              onLocalToggle: (newState) => {
+                finalize(newState)
+              },
+            })
+          } catch (error) {
+            settled = true
+            reject(error)
+          }
         })
         return success
       } catch (error) {

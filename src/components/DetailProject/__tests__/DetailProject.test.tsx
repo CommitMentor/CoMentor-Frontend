@@ -1,5 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DetailProject } from '../index'
 
 // next/navigation 모킹
@@ -17,6 +18,7 @@ const mockSubmitCSAnswer = jest.fn()
 const mockSaveCSQuestion = jest.fn()
 const mockBookmarkCSQuestion = jest.fn()
 const mockDeleteProject = jest.fn()
+const mockCancelBookmark = jest.fn()
 
 jest.mock('@/api', () => ({
   getProjectDetail: (...args: any[]) => mockGetProjectDetail(...args),
@@ -25,6 +27,7 @@ jest.mock('@/api', () => ({
   saveCSQuestion: (...args: any[]) => mockSaveCSQuestion(...args),
   bookmarkCSQuestion: (...args: any[]) => mockBookmarkCSQuestion(...args),
   useProjectDelete: () => ({ mutateAsync: mockDeleteProject }),
+  useFolderBookmarkCancel: () => ({ mutate: mockCancelBookmark }),
 }))
 
 // 하위 컴포넌트 모킹
@@ -111,7 +114,15 @@ const mockProjectData = {
 }
 
 describe('DetailProject', () => {
+  let queryClient: QueryClient
+
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
     jest.clearAllMocks()
     mockGetProjectDetail.mockResolvedValue(mockProjectData)
     mockGetCSQuestionHistory.mockResolvedValue({})
@@ -121,18 +132,26 @@ describe('DetailProject', () => {
     mockDeleteProject.mockResolvedValue(undefined)
   })
 
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>,
+    )
+  }
+
   test('로딩 중일 때 로딩 메시지를 표시한다', async () => {
     mockGetProjectDetail.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 1000)),
     )
 
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     expect(screen.getByText(/프로젝트 로딩 중/i)).toBeInTheDocument()
   })
 
   test('프로젝트 데이터를 성공적으로 로드한다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
@@ -145,7 +164,7 @@ describe('DetailProject', () => {
     // console.error를 모킹하여 에러 로그가 출력되지 않도록 함
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
 
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByText(/Failed to load/i)).toBeInTheDocument()
@@ -157,7 +176,7 @@ describe('DetailProject', () => {
   test('프로젝트가 없을 때 에러 메시지를 표시한다', async () => {
     mockGetProjectDetail.mockResolvedValue(null)
 
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(
@@ -167,7 +186,7 @@ describe('DetailProject', () => {
   })
 
   test('코드 선택 탭에서 코드를 선택하면 CS 질문 탭으로 전환한다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByText('CODE_SELECTION_TAB')).toBeInTheDocument()
@@ -184,7 +203,7 @@ describe('DetailProject', () => {
   })
 
   test('편집 버튼 클릭 시 편집 모달이 열린다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByLabelText('편집')).toBeInTheDocument()
@@ -199,7 +218,7 @@ describe('DetailProject', () => {
   })
 
   test('삭제 버튼 클릭 시 삭제 확인 대화상자가 열린다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByLabelText('삭제')).toBeInTheDocument()
@@ -214,7 +233,7 @@ describe('DetailProject', () => {
   })
 
   test('삭제 확인 시 프로젝트가 삭제된다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     await waitFor(() => {
       expect(screen.getByLabelText('삭제')).toBeInTheDocument()
@@ -238,7 +257,7 @@ describe('DetailProject', () => {
   })
 
   test('CS 질문 탭에서 답변 제출 시 handleAnswerSubmit이 호출된다', async () => {
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     // 먼저 코드 선택 탭에서 코드 선택
     await waitFor(() => {
@@ -266,7 +285,7 @@ describe('DetailProject', () => {
       .mockResolvedValueOnce(mockProjectData)
       .mockResolvedValueOnce({ ...mockProjectData, title: 'Updated Title' })
 
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     // 편집 버튼 클릭하여 모달 열기
     await waitFor(() => {
@@ -298,7 +317,7 @@ describe('DetailProject', () => {
     // console.error를 모킹하여 실제 로그가 출력되지 않도록
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
 
-    render(<DetailProject />)
+    renderWithProvider(<DetailProject />)
 
     // 프로젝트는 성공적으로 로드되어야 함
     await waitFor(() => {

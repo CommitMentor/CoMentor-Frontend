@@ -187,6 +187,12 @@ describe('QuestionList', () => {
 
     // ID가 없으면 onSelectQuestion이 호출되지 않음
     expect(onSelectQuestionMock).not.toHaveBeenCalled()
+    // ID가 없을 때 console.error가 호출되는 것이 정상 동작
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '질문 ID가 없습니다:',
+      questionWithoutId,
+    )
+    consoleErrorSpy.mockRestore()
   })
 
   test('답변 완료율 계산이 올바르다', () => {

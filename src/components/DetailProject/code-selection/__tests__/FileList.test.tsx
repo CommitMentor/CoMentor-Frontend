@@ -57,7 +57,7 @@ describe('FileList', () => {
   })
 
   test('로딩 중일 때 스켈레톤이 표시된다', () => {
-    const { container } = render(
+    render(
       <FileList
         files={[]}
         selectedFile=""
@@ -142,7 +142,7 @@ describe('FileList', () => {
   })
 
   test('선택된 파일이 강조 표시된다', () => {
-    const { container } = render(
+    render(
       <FileList
         files={mockFiles}
         selectedFile="src/test.tsx"
@@ -238,7 +238,7 @@ describe('FileList', () => {
   })
 
   test('로딩 상태에서는 스켈레톤이 표시되고 파일이 렌더링되지 않는다', () => {
-    const { container } = render(
+    render(
       <FileList
         files={mockFiles}
         selectedFile=""
