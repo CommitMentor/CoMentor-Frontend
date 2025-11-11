@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useCallback } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
 import { ProjectData } from './types'
@@ -23,10 +23,12 @@ import {
   useProjectDelete,
 } from '@/api'
 import { ProjectEditModal } from '../Modal/ProjectEditModal'
+import { useBookmarkHandler } from '@/hooks/useBookmarkHandler'
 
 export const DetailProject = () => {
   const { projectId } = useParams<{ projectId: string }>()
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const tabFromURL = searchParams.get('tab') || null
 
@@ -44,6 +46,7 @@ export const DetailProject = () => {
   const [activeCSQuestionIds, setActiveCSQuestionIds] = useState<number[]>([])
 
   const { mutateAsync: deleteProject } = useProjectDelete(Number(projectId))
+  const { handleBookmarkClick } = useBookmarkHandler()
 
   // 프로젝트 데이터 로드
   useEffect(() => {
@@ -96,14 +99,39 @@ export const DetailProject = () => {
     [],
   )
 
-  const handleSaveQuestion = useCallback(async (questionId: number) => {
-    try {
-      return await saveCSQuestion(questionId)
-    } catch (error) {
-      console.error('질문 저장 중 오류 발생:', error)
-      return false
-    }
-  }, [])
+  const handleSaveQuestion = useCallback(
+    async (questionId: number) => {
+      try {
+        const success = await new Promise<boolean>((resolve, reject) => {
+          let settled = false
+
+          const finalize = (value: boolean) => {
+            if (settled) return
+            settled = true
+            resolve(value)
+          }
+
+          try {
+            handleBookmarkClick({
+              questionId,
+              isBookmarked: false,
+              onLocalToggle: (newState) => {
+                finalize(newState)
+              },
+            })
+          } catch (error) {
+            settled = true
+            reject(error)
+          }
+        })
+        return success
+      } catch (error) {
+        console.error('질문 북마크 저장 중 오류 발생:', error)
+        return false
+      }
+    },
+    [handleBookmarkClick],
+  )
 
   const handleBookmarkQuestion = useCallback(async (questionId: number) => {
     try {
@@ -143,7 +171,7 @@ export const DetailProject = () => {
 
     try {
       await deleteProject()
-      window.location.href = `/dashboard?refresh=${new Date().getTime()}`
+      router.push(`/dashboard?refresh=${new Date().getTime()}`)
     } catch (error) {
       setDeleteError(
         error instanceof Error
@@ -153,7 +181,7 @@ export const DetailProject = () => {
     } finally {
       setDeleteLoading(false)
     }
-  }, [deleteProject])
+  }, [deleteProject, router])
 
   const handleCSQuestionsLoaded = useCallback((questions: any[]) => {
     if (questions && questions.length > 0) {
