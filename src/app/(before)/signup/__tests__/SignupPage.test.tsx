@@ -39,8 +39,6 @@ jest.mock('lucide-react', () => ({
   CheckIcon: () => <div>Check</div>,
 }))
 
-// --- 테스트 시작 ---
-
 describe('SignupPage', () => {
   // 각 테스트 전에 모킹된 함수들 초기화
   beforeEach(() => {
