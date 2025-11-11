@@ -16,6 +16,8 @@ export const useGetCSQuestion = (page: number) => {
     {
       enabled: page !== undefined,
       refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      staleTime: 0,
     },
   )
 }
