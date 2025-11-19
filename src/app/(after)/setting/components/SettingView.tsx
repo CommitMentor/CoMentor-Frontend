@@ -101,13 +101,13 @@ export default function SettingsView() {
 
   return (
     <main className="flex h-full flex-col py-3 lg:items-center lg:justify-center">
-      <section className="flex w-full flex-grow flex-col lg:max-w-5xl lg:flex-row lg:rounded-xl lg:border lg:border-slate-200 lg:p-3 lg:shadow-md">
+      <section className="flex w-full grow flex-col lg:max-w-5xl lg:flex-row lg:rounded-xl lg:border lg:border-slate-200 lg:p-3 lg:shadow-md">
         <SideNav
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onLogout={handleLogout}
         />
-        <article className="w-full flex-grow p-4 lg:p-4">
+        <article className="w-full grow p-4 lg:p-4">
           {activeTab === 'settings' && <UserSettings user={user} />}
           {activeTab === 'notifications' && <NotificationSettings />}
         </article>

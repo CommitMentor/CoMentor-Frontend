@@ -9,15 +9,16 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { CSCategory } from '@/api/types/common'
 
-export const useGetCSQuestion = (page: number) => {
+export const useGetCSQuestion = (
+  page: number,
+  initialData?: CSQuestionResponse,
+) => {
   return useGetQuery<CSQuestionResponse>(
     ['CS Dashboard', page.toString()],
     `/question/list?page=${page}`,
     {
       enabled: page !== undefined,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      staleTime: 0,
+      ...(initialData !== undefined ? { initialData } : {}),
     },
   )
 }
@@ -26,10 +27,16 @@ export const useGetCSQuestionDetail = (csQuestionId: number) => {
   return useGetQuery<CSQuestionDetailResponse>(
     ['cs-question', csQuestionId.toString()],
     `/question?csQuestionId=${csQuestionId}`,
+    {
+      refetchOnMount: true,
+    },
   )
 }
 
-export const useInfiniteQuestions = (category?: CSCategory | null) => {
+export const useInfiniteQuestions = (
+  category?: CSCategory | null,
+  initialData?: CSQuestionResponse | null,
+) => {
   return useInfiniteQuery<CSQuestionResponse>({
     queryKey: ['cs-question-infinite', category],
     queryFn: async ({ pageParam = 0 }) => {
@@ -42,12 +49,21 @@ export const useInfiniteQuestions = (category?: CSCategory | null) => {
         method: 'GET',
       })
     },
+
+    // 무한스크롤 다음 page 계산
     getNextPageParam: (lastPage) => {
       const { currentPage, totalPages } = lastPage.result
       return currentPage < totalPages - 1 ? currentPage + 1 : undefined
     },
+
     initialPageParam: 0,
-    staleTime: 1000 * 60 * 5,
+
+    // key가 바뀌면 초기 데이터 주입, category가 바뀌면 자동 무효화됨
+    initialData:
+      category == null && initialData
+        ? { pageParams: [0], pages: [initialData] }
+        : undefined,
+    staleTime: 1000 * 60,
     refetchOnMount: true,
   })
 }
