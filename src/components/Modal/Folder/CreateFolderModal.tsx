@@ -10,7 +10,7 @@ import { Folder, useFolderBookmark, useFolderInfo } from '@/api'
 interface FolderModalProps {
   questionId?: number
   csQuestionId?: number
-  onBookmarkDone?: () => void
+  onBookmarkDone?: (fileName?: string) => void
   onClose: () => void
 }
 
@@ -56,7 +56,7 @@ export const CreateFolderModal = ({
       },
       {
         onSuccess: () => {
-          onBookmarkDone?.()
+          onBookmarkDone?.(fileName)
         },
       },
     )
@@ -86,7 +86,7 @@ export const CreateFolderModal = ({
             setValue('selected', lastFolder.folderId)
 
             // 3. 북마크 동기화 콜백
-            onBookmarkDone?.()
+            onBookmarkDone?.(lastFolder.fileName)
           }
 
           // 4. UI 상태 초기화
