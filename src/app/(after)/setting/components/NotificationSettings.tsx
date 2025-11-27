@@ -21,7 +21,7 @@ const SettingsCard = ({
 }: SettingsCardProps) => (
   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-7 shadow hover:bg-gray-50 hover:transition-colors">
     <div className="rounded-full bg-slate-200 p-1 text-slate-500">{icon}</div>
-    <div className="flex-grow">
+    <div className="grow">
       <h4 className="text-sm font-medium">{title}</h4>
       <p className="text-[12px] text-slate-600">{description}</p>
     </div>

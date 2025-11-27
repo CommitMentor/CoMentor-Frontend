@@ -12,7 +12,7 @@ export type ModalProps = {
   createFolder: {
     questionId?: number
     csQuestionId?: number
-    onBookmarkDone?: () => void
+    onBookmarkDone?: (fileName?: string) => void
   }
   streakChart: {
     streakCount: number
