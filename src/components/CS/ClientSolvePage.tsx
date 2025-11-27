@@ -6,7 +6,6 @@ import { useBookmarkHandler } from '@/hooks/useBookmarkHandler'
 import { CSQuestionDetail, useGetCSQuestionDetail } from '@/api'
 import { CSSolve } from './Solve'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
 
 interface ClientSolvePageProps {
   question: CSQuestionDetail
@@ -20,7 +19,6 @@ export const ClientSolvePage = ({ question }: ClientSolvePageProps) => {
 
   const mergedQuestion = fetchedData?.result ?? question
   const [isBookmarked, setIsBookmarked] = useState(!!mergedQuestion.fileName)
-  const pathname = usePathname()
 
   useEffect(() => {
     setIsBookmarked(!!mergedQuestion.fileName)

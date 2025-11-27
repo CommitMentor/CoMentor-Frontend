@@ -60,7 +60,7 @@ export const useInfiniteQuestions = (
 
     // key가 바뀌면 초기 데이터 주입, category가 바뀌면 자동 무효화됨
     initialData:
-      category == null && initialData
+      (category === null || category === undefined) && initialData
         ? { pageParams: [0], pages: [initialData] }
         : undefined,
     staleTime: 1000 * 60,

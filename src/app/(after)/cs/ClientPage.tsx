@@ -4,8 +4,7 @@ import { useGetCSQuestion } from '@/api'
 import { CSCard } from '@/components/CS/Card/CSCard'
 import { ChevronRight, ChartColumn } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+
 import type { CSQuestionResponse } from '@/api/services/CS/model'
 
 export default function ClientPage({
@@ -15,10 +14,7 @@ export default function ClientPage({
 }) {
   const router = useRouter()
 
-  const { data, refetch } = useGetCSQuestion(0, initialData)
-  const pathname = usePathname()
-
-
+  const { data } = useGetCSQuestion(0, initialData)
 
   const today = new Date().toISOString().slice(0, 10)
   const todayGroup = data?.result.content.find((g) => g.date === today)

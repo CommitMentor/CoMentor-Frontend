@@ -36,7 +36,7 @@ const HistoryPage = ({ initialData }: { initialData: CSQuestionResponse }) => {
     if (isLoading || isFetchingNextPage) {
       setShowSkeleton(true)
     } else {
-      timer = setTimeout(() => setShowSkeleton(false), 500) // 최소 1초 유지
+      timer = setTimeout(() => setShowSkeleton(false), 500) 
     }
 
     return () => clearTimeout(timer)
