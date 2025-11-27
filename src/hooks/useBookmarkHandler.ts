@@ -1,6 +1,10 @@
 import { useFolderBookmarkCancel } from '@/api'
+import {
+  CSQuestionDetailResponse,
+  CSQuestionResponse,
+} from '@/api/services/CS/model'
 import { useModalStore } from '@/store/modalStore'
-import { useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useQueryClient } from '@tanstack/react-query'
 
 type HandleBookmarkParams = {
   questionId?: number
@@ -15,6 +19,73 @@ export const useBookmarkHandler = () => {
   const { openModal } = useModalStore()
   const queryClient = useQueryClient()
   const { mutate: cancelBookmark } = useFolderBookmarkCancel()
+
+  const updateCache = (
+    targetCsQuestionId: number,
+    newFileName: string | null,
+  ) => {
+    // 1. Infinite Query Update
+    queryClient.setQueriesData<InfiniteData<CSQuestionResponse>>(
+      { queryKey: ['cs-question-infinite'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            result: {
+              ...page.result,
+              content: page.result.content.map((group) => ({
+                ...group,
+                questions: group.questions.map((q) =>
+                  q.csQuestionId === targetCsQuestionId
+                    ? { ...q, fileName: newFileName ?? undefined }
+                    : q,
+                ),
+              })),
+            },
+          })),
+        }
+      },
+    )
+
+    // 2. Detail Query Update
+    queryClient.setQueryData<CSQuestionDetailResponse>(
+      ['cs-question', targetCsQuestionId.toString()],
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          result: {
+            ...oldData.result,
+            fileName: newFileName ?? undefined,
+          },
+        }
+      },
+    )
+
+    // 3. Dashboard Query Update
+    queryClient.setQueriesData<CSQuestionResponse>(
+      { queryKey: ['CS Dashboard'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          result: {
+            ...oldData.result,
+            content: oldData.result.content.map((group) => ({
+              ...group,
+              questions: group.questions.map((q) =>
+                q.csQuestionId === targetCsQuestionId
+                  ? { ...q, fileName: newFileName ?? undefined }
+                  : q,
+              ),
+            })),
+          },
+        }
+      },
+    )
+  }
 
   const handleBookmarkClick = ({
     questionId,
@@ -40,9 +111,14 @@ export const useBookmarkHandler = () => {
         {
           onSuccess: () => {
             onLocalToggle?.(false)
+            // 기존에 전달된 refetchKeys는 우선 무효화
             refetchKeys?.forEach((key) =>
               queryClient.invalidateQueries({ queryKey: key }),
             )
+
+            if (csQuestionId) {
+              updateCache(csQuestionId, null)
+            }
           },
         },
       )
@@ -50,11 +126,25 @@ export const useBookmarkHandler = () => {
       openModal('createFolder', {
         ...(questionId && { questionId }),
         ...(csQuestionId && { csQuestionId }),
-        onBookmarkDone: () => {
+        onBookmarkDone: (newFileName) => {
           onLocalToggle?.(true)
+          // 기존에 전달된 refetchKeys 무효화
           refetchKeys?.forEach((key) =>
             queryClient.invalidateQueries({ queryKey: key }),
           )
+
+          if (csQuestionId && newFileName) {
+            updateCache(csQuestionId, newFileName)
+          } else if (csQuestionId) {
+            // Fallback if filename is missing for some reason, though it shouldn't be
+            queryClient.invalidateQueries({
+              queryKey: ['cs-question-infinite'],
+            })
+            queryClient.invalidateQueries({ queryKey: ['CS Dashboard'] })
+            queryClient.invalidateQueries({
+              queryKey: ['cs-question', csQuestionId.toString()],
+            })
+          }
         },
       })
     }
